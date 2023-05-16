@@ -1,19 +1,37 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Text, View, StyleSheet, Modal } from "react-native";
 import Button from "./Button";
+import CapitalStatus from "./CapitalStatus";
 import NewProductForm from "./NewProductForm";
 import { BlurView } from "expo-blur";
+import { collection, getDocs, query } from "firebase/firestore";
+import { FIRESTORE_DB } from "../firebaseConfig";
 
 const Home = () => {
 	const [isModalVisible, setIsModalVisible] = useState(false);
-
+	const [products, setProducts] = useState([]);
 	const handleAddProduct = () => {
 		setIsModalVisible(true);
 	};
 
+	useEffect(() => {
+		const fetchProducts = async () => {
+			const q = query(collection(FIRESTORE_DB, "products"));
+			const querySnapshot = await getDocs(q);
+			let fetchedProducts = [];
+			querySnapshot.forEach((doc) => {
+				fetchedProducts.push(doc.data().product);
+			});
+			setProducts(fetchedProducts);
+		};
+
+		fetchProducts();
+	}, []);
+
 	return (
 		<View style={styles.container}>
 			<Text style={styles.text}>Home</Text>
+			<CapitalStatus products={products} />
 			<Button title="Add Buy" onPress={handleAddProduct} />
 			<Modal
 				visible={isModalVisible}
@@ -47,7 +65,7 @@ const styles = StyleSheet.create({
 	},
 	modalBackground: {
 		flex: 1,
-		backgroundColor: "rgba(0, 0, 0, 0)",
+		// backgroundColor: "rgba(0, 0, 0, 0)",
 		justifyContent: "flex-end",
 	},
 	modalContainer: {

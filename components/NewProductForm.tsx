@@ -8,6 +8,8 @@ import {
 	Switch,
 } from "react-native";
 import Button from "./Button";
+import { FIRESTORE_DB } from "../firebaseConfig";
+import { addDoc, collection } from "firebase/firestore";
 
 const NewProductForm = () => {
 	const [itemName, setItemName] = useState("");
@@ -17,7 +19,32 @@ const NewProductForm = () => {
 	const [isCashPayment, setIsCashPayment] = useState(true);
 
 	const handleSubmit = () => {
-		// handle form submission logic
+		// assuming `product` is an object containing the data you want to save
+		const product = {
+			name: itemName,
+			price: Number(price),
+			qty: Number(qty),
+			estimatedValue: Number(estimatedValue),
+			isCashPayment: isCashPayment,
+			// ...
+		};
+
+		const addProduct = async () => {
+			try {
+				await addDoc(collection(FIRESTORE_DB, "products"), {
+					product,
+				});
+				setItemName(""); // <-- Reset the state here
+				setPrice("");
+				setQty("");
+				setEstimatedValue("");
+				setIsCashPayment(true);
+				console.log("Document successfully written!");
+			} catch (error) {
+				console.error("Error writing document: ", error);
+			}
+		};
+		addProduct();
 	};
 
 	return (
